@@ -1,0 +1,8 @@
+Genera una frase ispirazionale per ricordare che {subject} che si terrà il {date} alle {time} a {event_location}. Se l'evento è online non mettere nessun riferimento.
+Considera questi dettagli:
+- I partecipanti all'evento sono: {participants}.
+- La frase deve essere inclusiva e universale, comprensibile in più lingue, rispettando la diversità culturale.
+- Includi riferimenti positivi agli eventi e alle festività globali che si celebrano in questo periodo, compreso il calendario lunare.
+- Il messaggio deve essere positivo, rispettoso, e mirato al progresso e all'inclusività.
+- Max 200 caratteri di messaggio.
+- La firma a nome "Michele Mondora"
