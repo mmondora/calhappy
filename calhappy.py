@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, date
 import requests
 import base64
 import os
+import argparse
 from ics import Calendar, Event  # Importa la libreria per lavorare con i file .ics
 
 # Inserisci il tuo client_id e client_secret ottenuti da Spotify
@@ -142,26 +143,70 @@ def calculate_end_time(start_time: str) -> str:
     return end_time_obj.strftime("%H:%M")
 
 
+# Funzione per configurare gli argomenti da linea di comando
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+        description='Generate calendar events with AI-generated inspirational quotes and soundtracks.',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog='''
+Examples:
+  python3 calhappy.py  # Interactive mode
+  python3 calhappy.py -s "Team Meeting" -a "john@example.com;jane@example.com" -l "Conference Room"
+  python3 calhappy.py --subject "Project Review" --attendees "team@company.com" --location "Online" --date 2026-01-25 --time 14:00
+        '''
+    )
+    parser.add_argument('-s', '--subject', type=str, help='Event subject/title')
+    parser.add_argument('-a', '--attendees', type=str, help='Attendees list (separated by ;)')
+    parser.add_argument('-l', '--location', type=str, help='Event location')
+    parser.add_argument('-d', '--date', type=str, help=f'Event date (YYYY-MM-DD) [default: {date.today()}]')
+    parser.add_argument('-t', '--time', type=str, help='Event start time (HH:MM) [default: 09:00]')
+    parser.add_argument('-m', '--message', type=str, help='Event message (auto-generated if not provided)')
+    return parser.parse_args()
+
 # Funzione principale
 def main():
-    # Ricevi input dall'utente
-    subject = input("Inserisci il subject dell'evento: ")
-    attendees_input = input("Inserisci l'elenco degli invitati (separati da ;): ")
-    event_location = input("Inserisci il luogo dell'evento: ")
+    # Parse command-line arguments
+    args = parse_arguments()
+
+    # Ricevi input dall'utente o usa gli argomenti da linea di comando
+    if args.subject:
+        subject = args.subject
+    else:
+        subject = input("Inserisci il subject dell'evento: ")
+
+    if args.attendees:
+        attendees_input = args.attendees
+    else:
+        attendees_input = input("Inserisci l'elenco degli invitati (separati da ;): ")
+
+    if args.location:
+        event_location = args.location
+    else:
+        event_location = input("Inserisci il luogo dell'evento: ")
 
     # Gestione della data
-    date_input = input(f"Inserisci la data dell'evento (YYYY-MM-DD) [default: {date.today()}]: ")
-    if not date_input:
-        date_input = str(date.today())
+    if args.date:
+        date_input = args.date
+    else:
+        date_input = input(f"Inserisci la data dell'evento (YYYY-MM-DD) [default: {date.today()}]: ")
+        if not date_input:
+            date_input = str(date.today())
 
     # Gestione dell'orario di inizio
-    time_input = input("Inserisci l'ora di inizio dell'evento (HH:MM) [default: 09:00]: ")
-    if not time_input:
-        time_input = "09:00"  # Orario di default a 09:00
+    if args.time:
+        time_input = args.time
+    else:
+        time_input = input("Inserisci l'ora di inizio dell'evento (HH:MM) [default: 09:00]: ")
+        if not time_input:
+            time_input = "09:00"  # Orario di default a 09:00
 
     # Calcolare l'orario di fine (50 minuti dopo l'inizio)
     end_time = calculate_end_time(time_input)
-    message = input("Inserisci il messaggio dell'evento (Premi invio per generarlo automaticamente): ")
+
+    if args.message is not None:
+        message = args.message
+    else:
+        message = input("Inserisci il messaggio dell'evento (Premi invio per generarlo automaticamente): ")
 
     # Se il messaggio è vuoto, genera il messaggio basato sul subject
     if not message:
